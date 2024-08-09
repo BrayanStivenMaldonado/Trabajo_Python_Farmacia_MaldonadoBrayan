@@ -42,6 +42,26 @@ def guardarMedicamentos(miMedicamento):
     with open("Medicamentos.json","w",encoding='utf-8') as outfile:
         json.dump(miMedicamento,outfile,indent=4) 
 
+#FUNCIONES PARA ABRIR Y GUARDAR DATOS DEL JSON DE PROVEEDORES
+def abrirProveedores():
+    Proveedores=[]
+    with open('Proveedores.json','r',encoding='utf-8') as openfile:
+        Proveedores = json.load(openfile)  
+    return Proveedores
+def guardarProveedores(miProveedor): 
+    with open("Proveedores.json","w",encoding='utf-8') as outfile:
+        json.dump(miProveedor,outfile,indent=4) 
+
+#FUNCIONES PARA ABRIR Y GUARDAR DATOS DEL JSON DE COMPRAS
+def abrirCompras():
+    Compras=[]
+    with open('Compras.json','r',encoding='utf-8') as openfile:
+        Compras = json.load(openfile)  
+    return Compras
+def guardarCompras(miCompra): 
+    with open("Compras.json","w",encoding='utf-8') as outfile:
+        json.dump(miCompra,outfile,indent=4) 
+
 #INICIO DEL PROGRAMA
 boolGeneral = True
 while boolGeneral == True:
@@ -91,6 +111,11 @@ while boolGeneral == True:
         CantidadMedicamento = int(input("Ingrese la cantidad de medicamentos: "))
         PrecioMedicamento = Medicamentos[EleMedicamento-1]["precio"]
         PrecioFinal = PrecioMedicamento*CantidadMedicamento
+        Stock = Medicamentos[EleMedicamento-1]["stock"]
+        Stock -= CantidadMedicamento
+        Medicamentos[EleMedicamento-1]["stock"] = Stock
+        guardarMedicamentos(Medicamentos)
+
         system("cls")
 
         #Datos que se van agregar al json de ventas
@@ -121,7 +146,59 @@ while boolGeneral == True:
     #COMPRAS
     elif Eleccion == 2:
         print("---COMPRAS---")
+        Fecha = date.today()
+        FechaCompra = Fecha.isoformat()
+        system("cls")
 
+        #PROVEEDORES
+        Proveedores = abrirProveedores()
+        contador = 1
+        print("Proveedores\n\nid    Nombre            Contacto                Direccion")
+        for i in Proveedores:
+            print(contador,"|",i["nombre"],"|",i["contacto"],"|",i["direccion"])
+            contador += 1
+        EleProveedor = int(input("\nIngrese el id del proveedor: "))
+        NombreProveedor = Proveedores[EleProveedor-1]["nombre"]
+        ContactoProveedor = Proveedores[EleProveedor-1]["contacto"]
+        system("cls")
+
+        #MEDICAMENTOS
+        Medicamentos = abrirMedicamentos()
+        contador = 1
+        print("Medicamentos\n\nid     Nombre")
+        for i in Medicamentos:
+            print(contador,"|",i["nombre"])
+            contador += 1
+        EleMedicamentoCompra = int(input("\nIngrese el id del medicamento a comprar: "))
+        NombreMedicamentoCompra = Medicamentos[EleMedicamentoCompra-1]["nombre"]
+        CantidadMedicamentoCompra = int(input("\nIngrese la cantidad de medicamentos que va a comprar: "))
+        PrecioMedicamentoCompra = int(input("\nIngrese el precio de compra de los medicamentos: "))
+        PrecioTotal = PrecioMedicamentoCompra*CantidadMedicamentoCompra
+        Stock = Medicamentos[EleMedicamentoCompra-1]["stock"]
+        Stock += CantidadMedicamentoCompra
+        Medicamentos[EleMedicamentoCompra-1]["stock"] = Stock
+        guardarMedicamentos(Medicamentos)
+
+        #Datos que se van a guardar en el json de compras
+        Compras = abrirCompras()
+        Compras["HistorialCompras"].append(
+            {
+                "Fecha" : FechaCompra,
+                "InfoProveedor" : {
+                    "NombreProveedor" : NombreProveedor,
+                    "ContactoProveedor" : ContactoProveedor
+                },
+                "MedicamentosComprados" : {
+                    "CantidadMedicamentoComprado" : CantidadMedicamentoCompra,
+                    "PrecioMedicamentoComprado" : PrecioMedicamentoCompra,
+                    "PrecioTotalCompra" : PrecioTotal
+                }
+            }
+        )
+        guardarCompras(Compras)
+        input("Compra registrada con éxito, presione ENTER para continuar")
+        system("cls")
+        
     elif Eleccion == 3: 
         input("Gracias  por preferir FarmCamp, nos vemos luego :)")
         system("cls")
